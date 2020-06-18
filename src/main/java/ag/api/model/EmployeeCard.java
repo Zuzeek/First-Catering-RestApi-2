@@ -24,13 +24,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "card")
+@Data
+@EqualsAndHashCode
+@ToString
 public class EmployeeCard extends RepresentationModel<EmployeeCard> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
@@ -83,17 +88,21 @@ public class EmployeeCard extends RepresentationModel<EmployeeCard> implements S
 			@Pattern(regexp = "^\\d{3}\\D{1}$", message = "Enter employee id") @NotEmpty String bowsEmployeeId,
 			@NotEmpty(message = "Enter name") String name, @Email(message = "Please provide valid email") String email,
 			@Pattern(regexp = "^07[\\d]{9}$", message = "Enter valid mobile number") String mobile,
-			@Pattern(regexp = "^[\\d\\D]{16}$", message = "Enter 16 alphanumeric characters card number") @NotEmpty String cardNumber,
+			@Pattern(regexp = "^[\\d]{4}$", message = "Enter 4 digit pin") String pin,
+			@Pattern(regexp = "^[\\d\\D]{16}$", message = "Enter 16 alphanumeric characters card number") @NotEmpty String dataCard,
 			Double balance, Boolean active) {
 		super();
 		this.bowsEmployeeId = bowsEmployeeId;
 		this.name = name;
 		this.email = email;
 		this.mobile = mobile;
-		this.dataCard = cardNumber;
+		this.pin = pin;
+		this.dataCard = dataCard;
 		this.balance = balance;
 		this.active = active;
 	}
+
+
 
 	public Double topupBalance(Double topupAmount) {
 		if(topupAmount > 0.00) {
@@ -101,94 +110,6 @@ public class EmployeeCard extends RepresentationModel<EmployeeCard> implements S
 			return balance; 
 		}
 		return balance; 
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public String getBowsEmployeeId() {
-		return bowsEmployeeId;
-	}
-
-	public void setBowsEmployeeId(String bowsEmployeeId) {
-		this.bowsEmployeeId = bowsEmployeeId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getMobile() {
-		return mobile;
-	}
-
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
-
-	public String getPin() {
-		return pin;
-	}
-
-	public void setPin(String pin) {
-		this.pin = pin;
-	}
-
-	public String getDataCard() {
-		return dataCard;
-	}
-
-	public void setDataCard(String dataCard) {
-		this.dataCard = dataCard;
-	}
-
-	public Double getBalance() {
-		return balance;
-	}
-
-	public void setBalance(Double balance) {
-		this.balance = balance;
-	}
-
-	public Boolean getActive() {
-		return active;
-	}
-
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public Date getModifiedAt() {
-		return modifiedAt;
-	}
-
-	public void setModifiedAt(Date modifiedAt) {
-		this.modifiedAt = modifiedAt;
 	}
 
 	

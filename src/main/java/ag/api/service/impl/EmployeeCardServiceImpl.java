@@ -8,7 +8,6 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ag.api.exception.UserNotFoundException;
 import ag.api.model.EmployeeCard;
 import ag.api.repository.EmployeeCardRepository;
 import ag.api.service.interfaces.EmployeeCardService;
