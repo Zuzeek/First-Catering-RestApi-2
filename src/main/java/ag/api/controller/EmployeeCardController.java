@@ -1,8 +1,12 @@
 package ag.api.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,8 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ag.api.exception.ResourceNotFoundException;
+import ag.api.exception.UserNotFoundException;
 import ag.api.model.EmployeeCard;
 import ag.api.service.interfaces.EmployeeCardService;
+import ag.api.util.SessionData;
 
 @RestController
 @RequestMapping(value = "card")
@@ -23,6 +29,7 @@ public class EmployeeCardController {
 	
 	@Autowired
 	private EmployeeCardService cardService; 
+	
 	
 	private static final String WELCOME_MESSAGE = "Welcome ";
     private static final String GOODBYE_MESSAGE = "Goodbye ";
@@ -33,10 +40,17 @@ public class EmployeeCardController {
 	 * 
 	 * consumes = MediaType.APPLICATION_JSON_VALUE => connects it to http and consumes JSON output from postman
 	 */
-	@PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, 
-				produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/register", 
+			consumes = MediaType.APPLICATION_JSON_VALUE, 
+			produces = MediaType.APPLICATION_JSON_VALUE)
 	public EmployeeCard register(@Valid @RequestBody EmployeeCard employeeDetails, String cardNumber) {
-		return cardService.addEmployee(employeeDetails); 
+		
+		if(!cardService.isDataCardAlreadyInUse(employeeDetails.getDataCard())) {
+			return cardService.addEmployee(employeeDetails); 
+		}
+		else 
+			throw new UserNotFoundException("Card already in the system"); 		
+		
 	}
     
 	/**
@@ -48,10 +62,10 @@ public class EmployeeCardController {
 	public EmployeeCard viewCard(@PathVariable(value = "id") Integer id) {
 		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
 		
-		if(card != null) {
+		if(card != null && card.getActive()) {
 			return card; 
 		}
-		else throw new ResourceNotFoundException("Employee card not found, enter valid id"); 
+		else throw new ResourceNotFoundException("Employee card not found, enter valid id or register your card"); 
 	}
 	
 	/**
@@ -60,6 +74,22 @@ public class EmployeeCardController {
 	 */
 	@GetMapping(value = {"", "/"}, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Iterable<EmployeeCard> viewAll(){
+		List<EmployeeCard> cardList = cardService.getAllEmployeeCards(); 
+		
+		for(EmployeeCard item: cardList) {
+			
+			// add self link 'product' singular resource 
+			// add RepresentationModel to inherit from Product, so  So once we create a link, so
+			// we can easily set that value to the resource representation without adding any new fields to it.
+			Link getLink = WebMvcLinkBuilder
+							.linkTo(EmployeeCardController.class) //the linkTo() method inspects the controller class and obtains its root mapping
+							.slash(item.getId()) // adds the productId value as the paths variable of the link 
+							.withSelfRel() // qualifies relation as a self link 
+							.withTitle("Get card details"); 
+			
+			// add a link to a singular resource 
+			item.add(getLink); 
+		}
 		return cardService.getAllEmployeeCards(); 
 	}
 		
@@ -73,7 +103,7 @@ public class EmployeeCardController {
 	public Double topup(@PathVariable(value = "id") Integer id, @RequestParam(value = "amount") Double topupAmount) {
 		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
 		
-		if(Boolean.TRUE.equals(card.getActive())) {
+		if(card != null && card.getActive()) {
 			card.topupBalance(topupAmount); 
 			cardService.saveCard(card); 
 			return card.getBalance(); 
@@ -91,7 +121,8 @@ public class EmployeeCardController {
 	@GetMapping(value = "/balance/{id}")
 	public Double viewBalance(@PathVariable(value = "id") Integer id) {
 		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
-		if(card != null) {
+		
+		if(card != null && card.getActive()) {
 			return cardService.getCardBalanceById(id); 
 		}
 		else 
@@ -108,32 +139,23 @@ public class EmployeeCardController {
 		EmployeeCard card = cardService.getSingleEmployeeCardByCardNumber(cardNumber); 
 				
 		if(card.getDataCard() != null) {
+			
+			if(card.getDataCard().equals(SessionData.getInstance().getCardNumber())) {
+				// scanned card matches last card scanned, so it is second tap to singout, 
+				// so clear card number from session 
+				SessionData.getInstance().setCardNumber("");
+				return GOODBYE_MESSAGE + card.getName(); 
+			}
+			else {
+				// scanned card does not match session, so it is a tap in event, first logout previous card
+				if(SessionData.getInstance().getCardNumber().length() > 0) {
+					return GOODBYE_MESSAGE + SessionData.getInstance().getCardNumber(); 
+				}
+			}
+			
+			// login a new card 
+			SessionData.getInstance().setCardNumber(cardNumber);
 			return WELCOME_MESSAGE + card.getName(); 
-		}
-		else 
-			throw new ResourceNotFoundException("Card not found, please register"); 
-	}
-	
-	@PostMapping(value = "/pin/{cardNumber}", consumes = MediaType.APPLICATION_JSON_VALUE, 
-				produces = MediaType.APPLICATION_JSON_VALUE)
-	public void pin(@PathVariable(value = "cardNumber") String cardNumber) {
-		EmployeeCard card = cardService.getSingleEmployeeCardByCardNumber(cardNumber); 
-		
-		if(Boolean.TRUE.equals(card.getActive())) {
-			card.setPin(card.getPin());
-			cardService.saveCard(card); 
-		}
-		else 
-			throw new ResourceNotFoundException("Card not registered, please register your card"); 
-	}
-	
-	
-	@GetMapping(value = "/scan/scan/logout/{cardNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String logoutEmployeeCard(@PathVariable(value = "cardNumber") String cardNumber) {
-		EmployeeCard card = cardService.getSingleEmployeeCardByCardNumber(cardNumber); 
-		
-		if(card != null) {
-			return GOODBYE_MESSAGE + card.getName(); 
 		}
 		else 
 			throw new ResourceNotFoundException("Card not found, please register"); 

@@ -3,9 +3,12 @@ package ag.api.service.impl;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ag.api.exception.UserNotFoundException;
 import ag.api.model.EmployeeCard;
 import ag.api.repository.EmployeeCardRepository;
 import ag.api.service.interfaces.EmployeeCardService;
@@ -23,15 +26,17 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 
 	@Override
 	public EmployeeCard addEmployee(EmployeeCard employeeDetails) {
-		employeeDetails.setBowsEmployeeId(employeeDetails.getBowsEmployeeId());
-		employeeDetails.setName(employeeDetails.getName());
-		employeeDetails.setEmail(employeeDetails.getEmail());
-		employeeDetails.setMobile(employeeDetails.getMobile());
+		EmployeeCard newEmployeeCard = new EmployeeCard();
+		newEmployeeCard.setBowsEmployeeId(employeeDetails.getBowsEmployeeId());
+		newEmployeeCard.setName(employeeDetails.getName());
+		newEmployeeCard.setEmail(employeeDetails.getEmail());
+		newEmployeeCard.setMobile(employeeDetails.getMobile());
+		newEmployeeCard.setPin(employeeDetails.getPin());
 		
-		employeeDetails.setDataCard(employeeDetails.getDataCard());
-		employeeDetails.setBalance(employeeDetails.getBalance());
-		employeeDetails.setActive(true);
-		return saveCard(employeeDetails); 
+		newEmployeeCard.setDataCard(employeeDetails.getDataCard());
+		newEmployeeCard.setBalance(employeeDetails.getBalance());
+		newEmployeeCard.setActive(true);
+		return saveCard(newEmployeeCard); 
 	}
 	
 	@Override
@@ -45,16 +50,6 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 		return null;
 	}
 	
-	@Override
-	public EmployeeCard topupBalanceById(Integer id, Double topupAmount) {
-		EmployeeCard card = getSingleEmployeeCardById(id); 
-		if(card != null) {
-			card.topupBalance(topupAmount); 
-			return saveCard(card);
-		}
-		return null; 
-	}
-
 	@Override
 	public Double getCardBalanceById(Integer id) {
 		EmployeeCard card = getSingleEmployeeCardById(id); 
@@ -98,4 +93,16 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 		cardRepository.deleteAll();
 	}
 
+	@Override
+	@Transactional
+	public boolean isDataCardAlreadyInUse(String cardNumber) {
+		EmployeeCard card = cardRepository.findByDataCard(cardNumber); 
+			
+		if(card != null && card.getActive()) {
+			return true; 
+		}
+		else 
+			return false; 
+	}
 }
+

@@ -17,6 +17,8 @@ import javax.validation.constraints.Pattern;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,13 +27,12 @@ import lombok.Data;
 
 @Entity
 @Table(name = "card")
-@Data
-public class EmployeeCard implements Serializable {
+public class EmployeeCard extends RepresentationModel<EmployeeCard> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Pattern(regexp = "^\\d{3}\\D{1}$", message = "Enter employee id") // ^[0-9]{3}[a-z]{1}$
@@ -56,6 +57,7 @@ public class EmployeeCard implements Serializable {
 	@Pattern(regexp = "^[\\d\\D]{16}$", message = "Enter 16 alphanumeric characters card number")
 	@JsonProperty("card-number")
 	@NotEmpty
+	@Column(unique = true)
 	private String dataCard; 
 	
 	private Double balance;
@@ -66,6 +68,7 @@ public class EmployeeCard implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	@JsonIgnore
+	@DateTimeFormat(pattern="MM/dd/yyyy")
 	private Date createdAt = new Date(); 
 	
 	@Column(nullable = false)
@@ -98,6 +101,94 @@ public class EmployeeCard implements Serializable {
 			return balance; 
 		}
 		return balance; 
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getBowsEmployeeId() {
+		return bowsEmployeeId;
+	}
+
+	public void setBowsEmployeeId(String bowsEmployeeId) {
+		this.bowsEmployeeId = bowsEmployeeId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
+	}
+
+	public String getDataCard() {
+		return dataCard;
+	}
+
+	public void setDataCard(String dataCard) {
+		this.dataCard = dataCard;
+	}
+
+	public Double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(Double balance) {
+		this.balance = balance;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Date getModifiedAt() {
+		return modifiedAt;
+	}
+
+	public void setModifiedAt(Date modifiedAt) {
+		this.modifiedAt = modifiedAt;
 	}
 
 	
