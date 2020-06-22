@@ -10,6 +10,7 @@ import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +29,7 @@ import ag.api.service.interfaces.EmployeeCardService;
 import ag.api.util.SessionData;
 
 @RestController
-@RequestMapping(value = "card")
+@RequestMapping(value = "/card")
 public class EmployeeCardController {
 	
 	@Autowired
@@ -202,4 +203,21 @@ public class EmployeeCardController {
 		else 
 			throw new ResourceNotFoundException("Card not found, please register"); 
 	}
+	
+	/**
+	 * 
+	 * @param id
+	 * delete single card resource 
+	 */
+	@DeleteMapping(value = "/remove/{id}")
+	public void deleteCard(@PathVariable(value = "id") Integer id) {
+		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
+		
+		if(card != null && card.getActive()) {
+			cardService.removeSingleEmployeeCardById(id);  
+		}
+		else 
+			throw new ResourceNotFoundException("Card with the provided id not found"); 
+	}
+	
 }
