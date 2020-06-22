@@ -7,7 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import javax.sql.DataSource;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,12 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,13 +42,21 @@ public class EmployeeCardControllerTest {
 	
 	@Autowired
 	MockMvc mockMvc; 
+	@Autowired
+	WebApplicationContext webAppContext; 
 	
 	@Autowired
-	ObjectMapper mapper; // Object mapper for object -> JSON conversion 
+	private ObjectMapper mapper; // Object mapper for object -> JSON conversion 
 	
 	@MockBean
 	@Autowired
 	private EmployeeCardService cardService; 
+	
+	@MockBean
+	private DataSource dataSource; 
+	@MockBean
+	private BCryptPasswordEncoder passwordEncoder; 
+	
 	
 	@InjectMocks
 	EmployeeCardController cardController; 
@@ -65,9 +79,29 @@ public class EmployeeCardControllerTest {
 								+ "\"card-number\":\"r345G7dqBy5wG456\","
 								+ "\"balance\":10.0,"
 								+ "\"active\":true\"}"; 
+
+	@Before
+	public void setUp() throws Exception {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webAppContext).build(); 
+		
+		EmployeeCard employeeDetails = new EmployeeCard(); 
+		
+		employeeDetails.setId(456);
+		employeeDetails.setActive(true);
+		employeeDetails.setName("test");
+		employeeDetails.setBowsEmployeeId("tes1");
+		employeeDetails.setDataCard("r345G7dqBy5wG400");
+		employeeDetails.setEmail("test@test.com");
+		employeeDetails.setMobile("07987654321");
+		employeeDetails.setBalance(100.00);
+		employeeDetails.setPin("1234");
+		
+		cardService.addEmployee(employeeDetails); 
+	}
+	
 	
 	@Test
-	public void post_createsNewEmployeeCard_andReturnsObjectWith201() throws Exception {
+	public void givenValidInputWhenCreatingNewEmployeeCardThenReturnsObjectWith201() throws Exception {
 		Mockito
 			.when(cardService.addEmployee(Mockito.any(EmployeeCard.class)))
 			.thenReturn(mockEmployeeCard); 
@@ -87,7 +121,7 @@ public class EmployeeCardControllerTest {
 	
 	
 	@Test
-	public void get_allEmployeeCards_returnsOkWithListOfAllEmployeeCards() throws Exception {
+	public void givenValidInputWhenFetchingAllEmployeeCardsThenReturnsListOfAllEmployeesWith200() throws Exception {
 		this.mockMvc.perform(get("/card")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -95,7 +129,7 @@ public class EmployeeCardControllerTest {
 	}
 	
 	@Test
-	public void put_topupBalance_returnsOkWhithNewBalance() throws Exception {
+	public void givenValidTopupAmountWhenFetchingTopupAmountThenObjectReturnsWithOk() throws Exception {
 		mockMvc.perform(put("/card/topup/{cardNumber}", "r345G7dqBy5wG456")
 				.param("amount", String.valueOf(amount)))
 				.andExpect(status().isOk())
