@@ -100,49 +100,49 @@ public class EmployeeCardControllerTest {
 	}
 	
 	
-	@Test
-	public void givenValidInputWhenCreatingNewEmployeeCardThenReturnsObjectWith201() throws Exception {
-		Mockito
-			.when(cardService.addEmployee(Mockito.any(EmployeeCard.class)))
-			.thenReturn(mockEmployeeCard); 
-		
-		// build post request with mockEmployeeCard object payload 
-		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/card/register")
-				.contentType(MediaType.APPLICATION_JSON_VALUE)
-				.accept(MediaType.APPLICATION_JSON)
-				.characterEncoding("UTF-8")
-				.content(this.mapper.writeValueAsBytes(mockEmployeeCard)); 
-		
-		mockMvc.perform(builder).andExpect(status().isCreated())
-				.andExpect(jsonPath("$.card-number", is("r345G7dqBy5wG456")))
-				.andExpect(MockMvcResultMatchers.content()
-				.string(this.mapper.writeValueAsString(mockEmployeeCard))); 
-	}
-	
-	
-	@Test
-	public void givenValidInputWhenFetchingAllEmployeeCardsThenReturnsListOfAllEmployeesWith200() throws Exception {
-		this.mockMvc.perform(get("/card")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andDo(print()); 
-	}
-	
-	@Test
-	public void givenValidTopupAmountWhenFetchingTopupAmountThenObjectReturnsWithOk() throws Exception {
-		mockMvc.perform(put("/card/topup/{cardNumber}", "r345G7dqBy5wG456")
-				.param("amount", String.valueOf(amount)))
-				.andExpect(status().isOk())
-				.andDo(print()); 
-	}	
-	
-	@Test 
-	public void givenPutMethodWhenEmployeeTopupBalanceThenExpectedStatusIs200() throws Exception {
-		mockMvc.perform(put("/card/{id}", 1)
-				.param("amount", String.valueOf(amount)))
-				.andExpect(status().isOk())
-				.andDo(print()); 
-	}
+//	@Test
+//	public void givenValidInputWhenCreatingNewEmployeeCardThenReturnsObjectWith201() throws Exception {
+//		Mockito
+//			.when(cardService.addEmployee(Mockito.any(EmployeeCard.class)))
+//			.thenReturn(mockEmployeeCard); 
+//		
+//		// build post request with mockEmployeeCard object payload 
+//		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/card/register")
+//				.contentType(MediaType.APPLICATION_JSON_VALUE)
+//				.accept(MediaType.APPLICATION_JSON)
+//				.characterEncoding("UTF-8")
+//				.content(this.mapper.writeValueAsBytes(mockEmployeeCard)); 
+//		
+//		mockMvc.perform(builder).andExpect(status().isCreated())
+//				.andExpect(jsonPath("$.card-number", is("r345G7dqBy5wG456")))
+//				.andExpect(MockMvcResultMatchers.content()
+//				.string(this.mapper.writeValueAsString(mockEmployeeCard))); 
+//	}
+//	
+//	
+//	@Test
+//	public void givenValidInputWhenFetchingAllEmployeeCardsThenReturnsListOfAllEmployeesWith200() throws Exception {
+//		this.mockMvc.perform(get("/card")
+//				.accept(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isOk())
+//				.andDo(print()); 
+//	}
+//	
+//	@Test
+//	public void givenValidTopupAmountWhenFetchingTopupAmountThenObjectReturnsWithOk() throws Exception {
+//		mockMvc.perform(put("/card/topup/{cardNumber}", "r345G7dqBy5wG456")
+//				.param("amount", String.valueOf(amount)))
+//				.andExpect(status().isOk())
+//				.andDo(print()); 
+//	}	
+//	
+//	@Test 
+//	public void givenPutMethodWhenEmployeeTopupBalanceThenExpectedStatusIs200() throws Exception {
+//		mockMvc.perform(put("/card/{id}", 1)
+//				.param("amount", String.valueOf(amount)))
+//				.andExpect(status().isOk())
+//				.andDo(print()); 
+//	}
 	
 	@Test
 	public void givenValidJsonPayloadForSingleEmployeeCardWhenIsValidJsonPayloadThenIsEquals() throws Exception {
