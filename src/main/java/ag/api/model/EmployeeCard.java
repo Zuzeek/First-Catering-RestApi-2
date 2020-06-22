@@ -19,6 +19,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.RepresentationModel;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,9 +30,9 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "card")
-@Data
 @EqualsAndHashCode
 @ToString
+@Data // auto generates setter and getters 
 public class EmployeeCard extends RepresentationModel<EmployeeCard> implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -56,7 +57,7 @@ public class EmployeeCard extends RepresentationModel<EmployeeCard> implements S
 	@Pattern(regexp = "^07[\\d]{9}$", message = "Enter valid mobile number")
 	private String mobile; 
 	
-	@Pattern(regexp = "^[\\d]{4}$", message = "Enter 4 digit pin")
+//	@Pattern(regexp = "^[\\d]{4}$", message = "Enter 4 digit pin")
 	private String pin; 
 	
 	@Pattern(regexp = "^[\\d\\D]{16}$", message = "Enter 16 alphanumeric characters card number")
@@ -111,6 +112,16 @@ public class EmployeeCard extends RepresentationModel<EmployeeCard> implements S
 		}
 		return balance; 
 	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); 
+		this.pin = passwordEncoder.encode(pin); 
+	}
+
 
 	
 	/*

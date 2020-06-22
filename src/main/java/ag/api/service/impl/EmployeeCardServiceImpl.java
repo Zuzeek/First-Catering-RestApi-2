@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import ag.api.model.EmployeeCard;
@@ -14,6 +15,9 @@ import ag.api.service.interfaces.EmployeeCardService;
 
 @Service
 public class EmployeeCardServiceImpl implements EmployeeCardService {
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder; 
 	
 	@Autowired
 	private EmployeeCardRepository cardRepository; 
@@ -30,7 +34,9 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 		newEmployeeCard.setName(employeeDetails.getName());
 		newEmployeeCard.setEmail(employeeDetails.getEmail());
 		newEmployeeCard.setMobile(employeeDetails.getMobile());
-		newEmployeeCard.setPin(employeeDetails.getPin());
+		
+		// encode pin 
+		newEmployeeCard.setPin(bCryptPasswordEncoder.encode(employeeDetails.getPin()));
 		
 		newEmployeeCard.setDataCard(employeeDetails.getDataCard());
 		newEmployeeCard.setBalance(employeeDetails.getBalance());

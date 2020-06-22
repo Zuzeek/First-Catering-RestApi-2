@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import ag.api.exception.ResourceNotFoundException;
 import ag.api.exception.UserNotFoundException;
@@ -45,7 +47,7 @@ public class EmployeeCardController {
 	@PostMapping(value = "/register", 
 			consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<EmployeeCard> register(@Valid @RequestBody EmployeeCard employeeDetails, String cardNumber) {
+	public ResponseEntity<EmployeeCard> register(@Valid @RequestBody EmployeeCard employeeDetails) {
 		
 		if(!cardService.isDataCardAlreadyInUse(employeeDetails.getDataCard())) {
 			return new ResponseEntity<EmployeeCard>(cardService.addEmployee(employeeDetails), HttpStatus.CREATED); 
