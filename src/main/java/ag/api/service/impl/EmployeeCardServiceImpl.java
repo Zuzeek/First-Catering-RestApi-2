@@ -44,18 +44,23 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	@Override
 	public EmployeeCard addEmployee(EmployeeCard employeeDetails) {
 		EmployeeCard newEmployeeCard = new EmployeeCard();
-		newEmployeeCard.setBowsEmployeeId(employeeDetails.getBowsEmployeeId());
-		newEmployeeCard.setName(employeeDetails.getName());
-		newEmployeeCard.setEmail(employeeDetails.getEmail());
-		newEmployeeCard.setMobile(employeeDetails.getMobile());
 		
-		// encode pin 
-		newEmployeeCard.setPin(bCryptPasswordEncoder.encode(employeeDetails.getPin()));
-		
-		newEmployeeCard.setDataCard(employeeDetails.getDataCard());
-		newEmployeeCard.setBalance(employeeDetails.getBalance());
-		newEmployeeCard.setActive(true);
-		return saveCard(newEmployeeCard); 
+		if(!isDataCardAlreadyInUse(newEmployeeCard.getDataCard())) {
+			newEmployeeCard.setBowsEmployeeId(employeeDetails.getBowsEmployeeId());
+			newEmployeeCard.setName(employeeDetails.getName());
+			newEmployeeCard.setEmail(employeeDetails.getEmail());
+			newEmployeeCard.setMobile(employeeDetails.getMobile());
+			
+			// encode pin 
+			newEmployeeCard.setPin(bCryptPasswordEncoder.encode(employeeDetails.getPin()));
+			
+			newEmployeeCard.setDataCard(employeeDetails.getDataCard());
+			newEmployeeCard.setBalance(employeeDetails.getBalance());
+			newEmployeeCard.setActive(true);
+			return saveCard(newEmployeeCard); 
+		}
+		else 
+			throw new UserNotFoundException("Card already in the system");
 	}
 	
 	@Override

@@ -47,13 +47,7 @@ public class EmployeeCardController {
 			consumes = MediaType.APPLICATION_JSON_VALUE, 
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<EmployeeCard> register(@Valid @RequestBody EmployeeCard employeeDetails) {
-		
-		if(!cardService.isDataCardAlreadyInUse(employeeDetails.getDataCard())) {
-			return new ResponseEntity<EmployeeCard>(cardService.addEmployee(employeeDetails), HttpStatus.CREATED); 
-		}
-		else 
-			throw new UserNotFoundException("Card already in the system"); 		
-		
+		return new ResponseEntity<EmployeeCard>(cardService.addEmployee(employeeDetails), HttpStatus.CREATED); 
 	}
 	
 	/**
@@ -110,8 +104,9 @@ public class EmployeeCardController {
 	 * @return new balance
 	 */
 	@PutMapping(value = "/topup/{cardNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Double topupBalance(@PathVariable(value = "cardNumber") String cardNumber, @RequestParam(value = "amount") Double topupAmount) {
-		return cardService.topupBalanceByCardNumber(cardNumber, topupAmount); 
+	public ResponseEntity<Double> topupBalance(@PathVariable(value = "cardNumber") String cardNumber, @RequestParam(value = "amount") Double topupAmount) {
+		Double card = cardService.topupBalanceByCardNumber(cardNumber, topupAmount); 
+		return new ResponseEntity<Double>(card, HttpStatus.OK);
 	}
 		
 	/**
