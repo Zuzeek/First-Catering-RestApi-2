@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import ag.api.exception.ResourceNotFoundException;
+import ag.api.exception.UserNotFoundException;
 import ag.api.model.EmployeeCard;
 import ag.api.repository.EmployeeCardRepository;
 import ag.api.service.interfaces.EmployeeCardService;
@@ -22,11 +24,23 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	@Autowired
 	private EmployeeCardRepository cardRepository; 
 
+	
 	@Override
 	public EmployeeCard saveCard(EmployeeCard cardDetails) {
 		return cardRepository.save(cardDetails);
 	}
-
+	
+	@Override
+	public boolean isDataCardAlreadyInUse(String cardNumber) {
+		EmployeeCard card = cardRepository.findByDataCard(cardNumber); 
+			
+		if(card != null && card.getActive()) {
+			return true; 
+		}
+		else 
+			return false; 
+	}
+	
 	@Override
 	public EmployeeCard addEmployee(EmployeeCard employeeDetails) {
 		EmployeeCard newEmployeeCard = new EmployeeCard();
@@ -45,32 +59,35 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	}
 	
 	@Override
-	public EmployeeCard topupBalanceByCardNumber(String cardNumber, Double topupAmount) {
+	public Double topupBalanceByCardNumber(String cardNumber, Double topupAmount) {
 		EmployeeCard card = getSingleEmployeeCardByCardNumber(cardNumber); 
 		
-		if(card != null) {
+		if(isDataCardAlreadyInUse(cardNumber)) {
 			card.topupBalance(topupAmount); 
-			return card; 
+			saveCard(card); 
+			return card.getBalance(); 
 		}
-		return null;
+		else 
+			throw new ResourceNotFoundException("Card with the provided card number not found, please register your card"); 
 	}
 	
 	@Override
 	public Double getCardBalanceById(Integer id) {
 		EmployeeCard card = getSingleEmployeeCardById(id); 
-		if(card != null)
+		
+		if(card != null && card.getActive())
 			return card.getBalance(); 
-		return null; 
+		else 
+			throw new UserNotFoundException();  
 	}
 
 	@Override
-	public EmployeeCard getSingleEmployeeCardByCardNumber(String cardNumber) {
-		EmployeeCard card =  cardRepository.findByDataCard(cardNumber); 
-		
-		if(card != null) {
-			return card; 
+	public EmployeeCard getSingleEmployeeCardByCardNumber(String cardNumber) {		
+		if(isDataCardAlreadyInUse(cardNumber)) {
+			return cardRepository.findByDataCard(cardNumber); 
 		}
-		return null; 
+		else 
+			throw new ResourceNotFoundException("Employee card not found, enter valid card number or register your card"); 
 	}
 
 	@Override
@@ -80,17 +97,28 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 		if(card.isPresent()) {
 			return card.get(); 
 		}
-		return null; 
+		else 
+			throw new ResourceNotFoundException("Employee card not found, enter valid id or register your card"); 
 	}
 
 	@Override
 	public List<EmployeeCard> getAllEmployeeCards() {
-		return cardRepository.findAll();
+		List<EmployeeCard> cardList = cardRepository.findAll(); 
+		
+		if(!cardList.isEmpty()) {
+			return cardList; 
+		}
+		else 
+			throw new ResourceNotFoundException("No employee cards records were found");
 	}
 
 	@Override
 	public void removeSingleEmployeeCardById(Integer id) {
-		cardRepository.deleteById(id);
+		if(getSingleEmployeeCardById(id) != null) {
+			cardRepository.deleteById(id);
+		}
+		else 
+			throw new ResourceNotFoundException("Card with the provided id not found");
 	}
 
 	@Override
@@ -98,16 +126,6 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 		cardRepository.deleteAll();
 	}
 
-	@Override
-	@Transactional
-	public boolean isDataCardAlreadyInUse(String cardNumber) {
-		EmployeeCard card = cardRepository.findByDataCard(cardNumber); 
-			
-		if(card != null && card.getActive()) {
-			return true; 
-		}
-		else 
-			return false; 
-	}
+	
 }
 

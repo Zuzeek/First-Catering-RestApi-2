@@ -18,9 +18,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.SessionAttributes;
 
 import ag.api.exception.ResourceNotFoundException;
 import ag.api.exception.UserNotFoundException;
@@ -66,11 +64,7 @@ public class EmployeeCardController {
 	@GetMapping(value = "/cn/{cardNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<EmployeeCard> viewSingleCard(@PathVariable(value = "cardNumber") String cardNumber) {
 		EmployeeCard card = cardService.getSingleEmployeeCardByCardNumber(cardNumber); 
-		
-		if(card != null && card.getActive()) {
-			return new ResponseEntity<EmployeeCard>(card, HttpStatus.OK); 
-		}
-		else throw new ResourceNotFoundException("Employee card not found, enter valid id or register your card"); 
+		return new ResponseEntity<EmployeeCard>(card, HttpStatus.OK); 
 	}
 	
 	
@@ -82,11 +76,7 @@ public class EmployeeCardController {
 	@GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<EmployeeCard> viewCard(@PathVariable(value = "id") Integer id) {
 		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
-		
-		if(card != null && card.getActive()) {
-			return new ResponseEntity<EmployeeCard>(card, HttpStatus.OK); 
-		}
-		else throw new ResourceNotFoundException("Employee card not found, enter valid id or register your card"); 
+		return new ResponseEntity<EmployeeCard>(card, HttpStatus.OK); 
 	}
 	
 	/**
@@ -110,10 +100,6 @@ public class EmployeeCardController {
 			// add a link to a singular resource 
 			item.add(getLink); 
 		}
-		
-		if(cardList.isEmpty()) {
-			throw new ResourceNotFoundException("No employee cards records were found"); 
-		}
 		return new ResponseEntity<List<EmployeeCard>>(cardList, HttpStatus.OK);
 	}
 	
@@ -125,15 +111,7 @@ public class EmployeeCardController {
 	 */
 	@PutMapping(value = "/topup/{cardNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Double topupBalance(@PathVariable(value = "cardNumber") String cardNumber, @RequestParam(value = "amount") Double topupAmount) {
-		EmployeeCard card = cardService.getSingleEmployeeCardByCardNumber(cardNumber); 
-		
-		if(card != null && card.getActive()) {
-			card.topupBalance(topupAmount); 
-			cardService.saveCard(card); 
-			return card.getBalance(); 
-		}
-		else 
-			throw new ResourceNotFoundException("Card with the provided card number not found, please register your card"); 
+		return cardService.topupBalanceByCardNumber(cardNumber, topupAmount); 
 	}
 		
 	/**
@@ -160,16 +138,9 @@ public class EmployeeCardController {
 	 * @param id
 	 * @return balance 
 	 */
-	// work on this method -> add extra check for if active then ... 
 	@GetMapping(value = "/balance/{id}")
 	public Double viewBalance(@PathVariable(value = "id") Integer id) {
-		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
-		
-		if(card != null && card.getActive()) {
-			return cardService.getCardBalanceById(id); 
-		}
-		else 
-			throw new ResourceNotFoundException("Card with the provided id not found, please register your card"); 
+		return cardService.getCardBalanceById(id); 
 	}
 	
 	/**
@@ -211,13 +182,7 @@ public class EmployeeCardController {
 	 */
 	@DeleteMapping(value = "/remove/{id}")
 	public void deleteCard(@PathVariable(value = "id") Integer id) {
-		EmployeeCard card = cardService.getSingleEmployeeCardById(id); 
-		
-		if(card != null && card.getActive()) {
-			cardService.removeSingleEmployeeCardById(id);  
-		}
-		else 
-			throw new ResourceNotFoundException("Card with the provided id not found"); 
+		cardService.removeSingleEmployeeCardById(id);
 	}
 	
 	

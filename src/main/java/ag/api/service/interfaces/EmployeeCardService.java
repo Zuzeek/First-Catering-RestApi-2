@@ -9,7 +9,7 @@ public interface EmployeeCardService {
 	EmployeeCard saveCard(EmployeeCard cardDetails); 	
 	EmployeeCard addEmployee(EmployeeCard employeeDetails);
 	
-	EmployeeCard topupBalanceByCardNumber(String cardNumber, Double topupAmount);
+	Double topupBalanceByCardNumber(String cardNumber, Double topupAmount);
 	Double getCardBalanceById(Integer id); 
 	
 	EmployeeCard getSingleEmployeeCardByCardNumber(String cardNumber); 
