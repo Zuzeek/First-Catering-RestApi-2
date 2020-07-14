@@ -10,13 +10,13 @@ public interface EmployeeCardService {
 	EmployeeCard addEmployee(EmployeeCard employeeDetails);
 	
 	Double topupBalanceByCardNumber(String cardNumber, Double topupAmount);
-	Double getCardBalanceById(Integer id); 
+	Double getCardBalanceById(int id); 
 	
 	EmployeeCard getSingleEmployeeCardByCardNumber(String cardNumber); 
-	EmployeeCard getSingleEmployeeCardById(Integer id); 
+	EmployeeCard getSingleEmployeeCardById(int id); 
 	List<EmployeeCard> getAllEmployeeCards();
 	
-	void removeSingleEmployeeCardById(Integer id); 
+	void removeSingleEmployeeCardById(int id); 
 	void removeAllEmployeeCards();
 		
 	boolean isDataCardAlreadyInUse(String cardNumber);

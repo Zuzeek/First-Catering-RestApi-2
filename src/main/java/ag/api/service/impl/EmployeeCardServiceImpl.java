@@ -3,8 +3,6 @@ package ag.api.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,7 +43,7 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	public EmployeeCard addEmployee(EmployeeCard employeeDetails) {
 		EmployeeCard newEmployeeCard = new EmployeeCard();
 		
-		if(!isDataCardAlreadyInUse(newEmployeeCard.getDataCard())) {
+		while(!isDataCardAlreadyInUse(newEmployeeCard.getDataCard())) {
 			newEmployeeCard.setBowsEmployeeId(employeeDetails.getBowsEmployeeId());
 			newEmployeeCard.setName(employeeDetails.getName());
 			newEmployeeCard.setEmail(employeeDetails.getEmail());
@@ -59,7 +57,7 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 			newEmployeeCard.setActive(true);
 			return saveCard(newEmployeeCard); 
 		}
-		else 
+		
 			throw new UserNotFoundException("Card already in the system");
 	}
 	
@@ -77,7 +75,7 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	}
 	
 	@Override
-	public Double getCardBalanceById(Integer id) {
+	public Double getCardBalanceById(int id) {
 		EmployeeCard card = getSingleEmployeeCardById(id); 
 		
 		if(card != null && card.getActive())
@@ -96,7 +94,7 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	}
 
 	@Override
-	public EmployeeCard getSingleEmployeeCardById(Integer id) {
+	public EmployeeCard getSingleEmployeeCardById(int id) {
 		Optional<EmployeeCard> card = cardRepository.findById(id); 
 		
 		if(card.isPresent()) {
@@ -118,7 +116,7 @@ public class EmployeeCardServiceImpl implements EmployeeCardService {
 	}
 
 	@Override
-	public void removeSingleEmployeeCardById(Integer id) {
+	public void removeSingleEmployeeCardById(int id) {
 		if(getSingleEmployeeCardById(id) != null) {
 			cardRepository.deleteById(id);
 		}
